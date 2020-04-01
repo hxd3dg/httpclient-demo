@@ -1,12 +1,12 @@
 package com.example.httpClientDemo.util;
 
+import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
@@ -91,7 +91,10 @@ public class HttpClientUtil {
             e.printStackTrace();
         } finally {
             try {
-                response.close();
+                if (response != null) {
+                    response.close();
+                }
+                httpClient.close();
             } catch (IOException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
@@ -114,16 +117,27 @@ public class HttpClientUtil {
             // 创建Http Post请求
             HttpPost httpPost = new HttpPost(url);
             // 创建请求内容
-            StringEntity entity = new StringEntity(json, ContentType.APPLICATION_JSON);
+            httpPost.setHeader("HTTP Method","POST");
+            httpPost.setHeader("Connection","Keep-Alive");
+            httpPost.setHeader("Content-Type","application/json;charset=utf-8");
+
+            StringEntity entity = new StringEntity(json);
+            entity.setContentType("application/json;charset=utf-8");
             httpPost.setEntity(entity);
             // 执行http请求
             response = httpClient.execute(httpPost);
-            resultString = EntityUtils.toString(response.getEntity(), "utf-8");
+
+            if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+                resultString = EntityUtils.toString(response.getEntity(), "UTF-8");
+            }
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
             try {
-                response.close();
+                if (response != null) {
+                    response.close();
+                }
+                httpClient.close();
             } catch (IOException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
